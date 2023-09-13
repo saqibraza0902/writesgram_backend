@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import BlogRoutes from './routes/Blog.routes';
+import bodyParser from 'body-parser';
+
 require('dotenv').config();
 const mongoURI = process.env.MONGO_URI as string;
 mongoose
@@ -15,7 +17,7 @@ mongoose
   })
   .catch((err) => console.log(err));
 const app = express();
-
+app.use(express.json({ limit: '50mb' }));
 app.use(morgan('dev'));
 app.use(helmet());
 app.use(cors());
