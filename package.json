@@ -8,7 +8,8 @@
     "dev": "nodemon src/index.ts",
     "build": "tsc",
     "test": "jest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "vercel-build": "echo hello"
   },
   "keywords": [],
   "author": "CJ R. <cj@null.computer> (https://w3cj.now.sh)",
@@ -18,13 +19,17 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@sendgrid/mail": "^7.7.0",
+    "bcrypt": "^5.1.1",
     "cloudinary": "^1.40.0",
     "cors": "^2.8.5",
     "dotenv": "^16.1.4",
     "express": "^4.18.2",
     "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.4.3",
     "morgan": "^1.10.0",
+    "nodemailer": "^6.9.5",
     "yup": "^1.2.0"
   },
   "devDependencies": {

@@ -1,9 +1,6 @@
 import express from 'express';
-import {
-  AddBlog,
-  GetBlog,
-  GetSingleBlog,
-} from '../controllers/Blog.controller';
+import { AddBlog, GetBlog } from '../controllers/Blog.controller';
+import { GetSingleBlog } from '../controllers/Blog.controller';
 
 const router = express.Router();
 

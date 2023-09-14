@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import BlogRoutes from './routes/Blog.routes';
+import UserRoutes from './routes/Users.routes';
 import bodyParser from 'body-parser';
 
 require('dotenv').config();
@@ -24,4 +25,5 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/blog', BlogRoutes);
+app.use('/user', UserRoutes);
 export default app;

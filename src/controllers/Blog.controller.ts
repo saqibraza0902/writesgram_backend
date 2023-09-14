@@ -28,7 +28,7 @@ export const AddBlog = async (req: Request, res: Response): Promise<void> => {
     res.status(201).json(savedBlogPost);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to create a new blog post' });
+    res.status(500).json({ message: error });
   }
 };
 
