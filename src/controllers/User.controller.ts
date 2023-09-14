@@ -6,6 +6,8 @@ import { createAccessToken } from '../utils/CreateAccessToken';
 import { loginValidator } from '../validators/Users.validators';
 import OTP from '../modals/OTP.mdoal';
 import { otpservice } from '../services/otpservice';
+import Contact from '../modals/Contact.modal';
+import { contactservice } from '../services/contactservice';
 
 export const SignUp = async (req: Request, res: Response) => {
   try {
@@ -74,6 +76,24 @@ export const VerifyOtp = async (req: Request, res: Response) => {
     await Users.findByIdAndUpdate({ _id: id }, { verified: true });
     await OTP.deleteMany({ user: id });
     return res.status(201).json({ token });
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+export const ContactUs = async (req: Request, res: Response) => {
+  try {
+    const { email, subject, msg } = req.body;
+    if (email && subject && msg) {
+      const newcontact = new Contact({
+        email,
+        subject,
+        msg,
+      });
+      await newcontact.save();
+      contactservice({ email, subject, msg });
+      return res.status(200).json({ message: 'Message has been send' });
+    }
+    return res.status(400).json({ message: 'Please fill the fields' });
   } catch (error) {
     res.status(500).json({ message: error });
   }
