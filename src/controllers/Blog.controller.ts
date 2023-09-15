@@ -1,12 +1,13 @@
 import { Response, Request } from 'express';
-import BlogPost from '../modals/blog';
+import Blog, { IContent } from '../modals/Blog.modal';
 import { UploadImage } from '../lib/CloudinaryConfig';
 export const AddBlog = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { title, paragraph, frontImage, content } = req.body;
+    const { title, paragraph, frontImage, content, category } = req.body;
+    const { id } = req.query;
     const frontImageUpload = await UploadImage(frontImage);
     const contentWithImages = await Promise.all(
-      content.map(async (contentItem) => {
+      content.map(async (contentItem: IContent) => {
         if (contentItem.image) {
           const imageUpload = await UploadImage(contentItem.image);
           return {
@@ -17,10 +18,12 @@ export const AddBlog = async (req: Request, res: Response): Promise<void> => {
         return contentItem;
       })
     );
-    const blogPost = new BlogPost({
+    const blogPost = new Blog({
       title,
       paragraph,
       frontImage: frontImageUpload.secure_url,
+      writer: id,
+      category: category,
       content: contentWithImages,
     });
 
@@ -34,7 +37,7 @@ export const AddBlog = async (req: Request, res: Response): Promise<void> => {
 
 export const GetBlog = async (req: Request, res: Response) => {
   try {
-    const blog = await BlogPost.find();
+    const blog = await Blog.find();
     return res.status(200).json(blog);
   } catch (error) {
     return res.status(500).json({ message: error });
@@ -43,7 +46,8 @@ export const GetBlog = async (req: Request, res: Response) => {
 export const GetSingleBlog = async (req: Request, res: Response) => {
   try {
     const { id } = req.query;
-    const blog = await BlogPost.findById(id);
+    const blog = await Blog.findById(id);
+    await Blog.findByIdAndUpdate({ _id: id }, { visitors: blog.visitors + 1 });
     return res.status(200).json(blog);
   } catch (error) {
     return res.status(500).json({ message: error });
