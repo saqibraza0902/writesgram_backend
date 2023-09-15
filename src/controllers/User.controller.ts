@@ -12,7 +12,6 @@ import { contactservice } from '../services/contactservice';
 export const SignUp = async (req: Request, res: Response) => {
   try {
     const { name, phone, country, city, email, password } = req.body;
-    console.log(name, phone, country, city, email, password);
     const isExist = await Users.findOne({ email: email });
     if (isExist) {
       return res.status(409).json({ message: 'User already exist' });
@@ -50,7 +49,17 @@ export const Login = async (req: Request, res: Response) => {
       const token = createAccessToken({
         _id: String(dbUser._id),
       });
-      return res.status(201).json({ token });
+      const user = await Users.findById(dbUser._id);
+      const returneduser = {
+        id: user._id,
+        city: user.city,
+        country: user.country,
+        email: user.email,
+        name: user.name,
+        phone: user.phone,
+        verified: user.verified,
+      };
+      return res.status(201).json({ token, user: returneduser });
     }
     const otpCode = Math.floor(1000 + Math.random() * 9000);
     let otpData = new OTP({ user: dbUser._id, code: otpCode });
@@ -62,7 +71,6 @@ export const Login = async (req: Request, res: Response) => {
     res.status(500).json({ message: error });
   }
 };
-
 export const VerifyOtp = async (req: Request, res: Response) => {
   try {
     const { id, otp } = req.body;
@@ -75,7 +83,17 @@ export const VerifyOtp = async (req: Request, res: Response) => {
     });
     await Users.findByIdAndUpdate({ _id: id }, { verified: true });
     await OTP.deleteMany({ user: id });
-    return res.status(201).json({ token });
+    const user = await Users.findById(id);
+    const returneduser = {
+      id: user._id,
+      city: user.city,
+      country: user.country,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      verified: user.verified,
+    };
+    return res.status(201).json({ token, user: returneduser });
   } catch (error) {
     res.status(500).json({ message: error });
   }
@@ -94,6 +112,44 @@ export const ContactUs = async (req: Request, res: Response) => {
       return res.status(200).json({ message: 'Message has been send' });
     }
     return res.status(400).json({ message: 'Please fill the fields' });
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+export const UpdateProfile = async (req: Request, res: Response) => {
+  try {
+    const { name, email, country, city } = req.body;
+    const { id } = req.query;
+    console.log(id, name, email, country, city);
+    const UpdateUser = await Users.findByIdAndUpdate(
+      { _id: id },
+      { name: name, email: email, country: country, city: city }
+    );
+    if (UpdateUser) {
+      return res.status(201).json({ message: 'Profile Updated Successfully' });
+    }
+    return res.status(400).json({ message: 'Error Updating Profile' });
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+export const ResetPassword = async (req: Request, res: Response) => {
+  try {
+    const { oldpassword, newpassword, confirmnewpassword } = req.body;
+    const { id } = req.query;
+    const user = await Users.findById(id);
+    const isPasswordOkay = await comparePassword(user.password, oldpassword);
+    if (!isPasswordOkay) {
+      return res.status(400).json({ message: 'Old password is incorrect' });
+    }
+    if (newpassword !== confirmnewpassword) {
+      return res.status(400).json({
+        message: 'New password and confirm new password should be same',
+      });
+    }
+    const hashpassword = await createHashPassword(confirmnewpassword);
+    await Users.findByIdAndUpdate({ _id: id }, { password: hashpassword });
+    return res.status(200).json({ message: 'Password updated sucessfully' });
   } catch (error) {
     res.status(500).json({ message: error });
   }
