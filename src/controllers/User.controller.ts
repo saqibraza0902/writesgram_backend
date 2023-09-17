@@ -3,7 +3,12 @@ import Users from '../modals/User.modal';
 import { createHashPassword } from '../utils/CreateHashPassword';
 import { comparePassword } from '../utils/CompareHashPassword';
 import { createAccessToken } from '../utils/CreateAccessToken';
+import { SignUpValidator } from '../validators/Users.validators';
 import { loginValidator } from '../validators/Users.validators';
+import { OTPValidator } from '../validators/Users.validators';
+import { ContactValidator } from '../validators/Users.validators';
+import { ProfileValidator } from '../validators/Users.validators';
+import { PasswordValidator } from '../validators/Users.validators';
 import OTP from '../modals/OTP.mdoal';
 import { otpservice } from '../services/otpservice';
 import Contact from '../modals/Contact.modal';
@@ -11,7 +16,8 @@ import { contactservice } from '../services/contactservice';
 
 export const SignUp = async (req: Request, res: Response) => {
   try {
-    const { name, phone, country, city, email, password } = req.body;
+    const { name, phone, country, city, email, password } =
+      await SignUpValidator.validate(req.body);
     const isExist = await Users.findOne({ email: email });
     if (isExist) {
       return res.status(409).json({ message: 'User already exist' });
@@ -73,7 +79,7 @@ export const Login = async (req: Request, res: Response) => {
 };
 export const VerifyOtp = async (req: Request, res: Response) => {
   try {
-    const { id, otp } = req.body;
+    const { id, otp } = await OTPValidator.validate(req.body);
     const check = await OTP.findOne({ code: otp, user: id });
     if (!check) {
       return res.status(400).json({ message: 'Invalid Otp' });
@@ -100,7 +106,7 @@ export const VerifyOtp = async (req: Request, res: Response) => {
 };
 export const ContactUs = async (req: Request, res: Response) => {
   try {
-    const { email, subject, msg } = req.body;
+    const { email, subject, msg } = await ContactValidator.validate(req.body);
     if (email && subject && msg) {
       const newcontact = new Contact({
         email,
@@ -118,7 +124,9 @@ export const ContactUs = async (req: Request, res: Response) => {
 };
 export const UpdateProfile = async (req: Request, res: Response) => {
   try {
-    const { name, email, country, city } = req.body;
+    const { name, email, country, city } = await ProfileValidator.validate(
+      req.body
+    );
     const { id } = req.query;
     console.log(id, name, email, country, city);
     const UpdateUser = await Users.findByIdAndUpdate(
@@ -135,7 +143,8 @@ export const UpdateProfile = async (req: Request, res: Response) => {
 };
 export const ResetPassword = async (req: Request, res: Response) => {
   try {
-    const { oldpassword, newpassword, confirmnewpassword } = req.body;
+    const { oldpassword, newpassword, confirmnewpassword } =
+      await PasswordValidator.validate(req.body);
     const { id } = req.query;
     const user = await Users.findById(id);
     const isPasswordOkay = await comparePassword(user.password, oldpassword);
