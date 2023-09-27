@@ -68,6 +68,7 @@ export const GetFeaturedPosts = async (req: Request, res: Response) => {
   try {
     const getposts = await Blog.find({ featured: true })
       .limit(2)
+      .sort({ _id: -1 })
       .populate('writer', '-password')
     return res.status(200).json({ blog: getposts })
   } catch (error) {
