@@ -22,12 +22,27 @@ export const AddBlog = async (req: Request, res: Response): Promise<void> => {
         return contentItem
       })
     )
+    const arraycount = content
+      .filter(blogs => blogs.title !== null)
+      .map(b => {
+        return countWords(b.title)
+      })
+    const totalWordCount = arraycount.reduce((accumulator, currentValue) => {
+      return accumulator + currentValue
+    }, 0)
+    const wordCount =
+      countWords(title) +
+      countWords(category) +
+      countWords(paragraph) +
+      totalWordCount
+    const mins = Math.ceil(wordCount / 200)
     const blogPost = new Blog({
       title,
       paragraph,
       frontImage: frontImageUpload.secure_url,
       writer: id,
       category: category,
+      time: mins,
       content: contentWithImages
     })
     const savedBlogPost = await blogPost.save()
@@ -54,11 +69,20 @@ export const GetBlog = async (req: Request, res: Response) => {
     return res.status(500).json({ message: error })
   }
 }
+
+function countWords (text) {
+  if (!text) {
+    return 0 // Return 0 for empty or null text
+  }
+  const words = text.split(/\s+/).filter(word => word.length > 0)
+  return words.length
+}
 export const GetSingleBlog = async (req: Request, res: Response) => {
   try {
     const { id } = await GetSingleBlogValidator.validate(req.query)
     const blog = await Blog.findById(id)
     await Blog.findByIdAndUpdate({ _id: id }, { visitors: blog.visitors + 1 })
+
     return res.status(200).json(blog)
   } catch (error) {
     return res.status(500).json({ message: error })
@@ -70,6 +94,7 @@ export const GetFeaturedPosts = async (req: Request, res: Response) => {
       .limit(2)
       .sort({ _id: -1 })
       .populate('writer', '-password')
+
     return res.status(200).json({ blog: getposts })
   } catch (error) {
     return res.status(500).json({ message: error })
