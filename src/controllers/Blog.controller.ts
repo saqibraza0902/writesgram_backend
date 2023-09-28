@@ -4,6 +4,7 @@ import { UploadImage } from '../lib/CloudinaryConfig'
 import { CreateBlogValidator } from '../validators/Blog.validators'
 import { GetBlogValidor } from '../validators/Blog.validators'
 import { GetSingleBlogValidator } from '../validators/Blog.validators'
+import { countWords } from '../utils/WordCount'
 export const AddBlog = async (req: Request, res: Response): Promise<void> => {
   try {
     const { title, paragraph, frontImage, content, category } =
@@ -70,13 +71,6 @@ export const GetBlog = async (req: Request, res: Response) => {
   }
 }
 
-function countWords (text) {
-  if (!text) {
-    return 0 // Return 0 for empty or null text
-  }
-  const words = text.split(/\s+/).filter(word => word.length > 0)
-  return words.length
-}
 export const GetSingleBlog = async (req: Request, res: Response) => {
   try {
     const { id } = await GetSingleBlogValidator.validate(req.query)
@@ -95,7 +89,18 @@ export const GetFeaturedPosts = async (req: Request, res: Response) => {
       .sort({ _id: -1 })
       .populate('writer', '-password')
 
-    return res.status(200).json({ blog: getposts })
+    return res.status(200).json(getposts)
+  } catch (error) {
+    return res.status(500).json({ message: error })
+  }
+}
+export const GetPopularPost = async (req: Request, res: Response) => {
+  try {
+    const posts = await Blog.find()
+      .sort({ visitors: -1 })
+      .limit(4)
+      .populate('writer', '-password')
+    return res.status(200).json(posts)
   } catch (error) {
     return res.status(500).json({ message: error })
   }
