@@ -53,24 +53,23 @@ export const AddBlog = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: error })
   }
 }
-
 export const GetBlog = async (req: Request, res: Response) => {
   try {
     const { page = 1 } = await GetBlogValidor.validate(req.query)
     const limit = 6
     const skip = (page - 1) * limit
-    const blog = await Blog.find().sort({ _id: -1 }).skip(skip).limit(limit)
+    const blog = await Blog.find()
+      .sort({ _id: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('writer', '-password')
     const totalblogs = await Blog.count()
-    setTimeout(() => {
-      return res
-        .status(200)
-        .json({ blog, total: Math.ceil(totalblogs / limit) })
-    }, 2000)
+    const totalpages = Math.ceil(totalblogs / limit)
+    return res.status(200).json({ blog, totalpages })
   } catch (error) {
     return res.status(500).json({ message: error })
   }
 }
-
 export const GetSingleBlog = async (req: Request, res: Response) => {
   try {
     const { id } = await GetSingleBlogValidator.validate(req.query)

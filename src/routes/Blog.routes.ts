@@ -5,7 +5,7 @@ import { GetPopularPost } from '../controllers/Blog.controller'
 const router = express.Router()
 
 router.post('/add-blog', AddBlog)
-router.get('/get-blog', GetBlog)
+router.get('/latest', GetBlog)
 router.get('/get-single-blog', GetSingleBlog)
 router.get('/featured', GetFeaturedPosts)
 router.get('/popular', GetPopularPost)
