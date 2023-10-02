@@ -175,7 +175,7 @@ export const AdminLogin = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Incorrect credentials' })
     }
     const isVerifed = await Users.findOne({ email: email })
-    if (isVerifed.verified) {
+    if (isVerifed.admin) {
       const token = createAccessToken({
         _id: String(dbUser._id)
       })
@@ -191,7 +191,7 @@ export const AdminLogin = async (req: Request, res: Response) => {
       }
       return res.status(200).json({ token, user: returneduser })
     }
-    return res.status(400).json({ message: 'Admin is not verified' })
+    return res.status(400).json({ message: 'Please enter your admin email' })
   } catch (error) {
     res.status(500).json({ message: error })
   }

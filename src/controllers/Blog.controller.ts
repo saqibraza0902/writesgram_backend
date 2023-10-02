@@ -5,6 +5,7 @@ import { CreateBlogValidator } from '../validators/Blog.validators'
 import { GetBlogValidor } from '../validators/Blog.validators'
 import { GetSingleBlogValidator } from '../validators/Blog.validators'
 import { countWords } from '../utils/WordCount'
+import User from '../modals/User.modal'
 export const AddBlog = async (req: Request, res: Response): Promise<void> => {
   try {
     const { title, paragraph, frontImage, content, category } =
@@ -100,6 +101,57 @@ export const GetPopularPost = async (req: Request, res: Response) => {
       .limit(4)
       .populate('writer', '-password')
     return res.status(200).json(posts)
+  } catch (error) {
+    return res.status(500).json({ message: error })
+  }
+}
+export const SetFeatured = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.query
+    const { page = 1 } = await GetBlogValidor.validate(req.query)
+    const limit = 6
+    const skip = (page - 1) * limit
+    const update = await Blog.findByIdAndUpdate({ _id: id }, { featured: true })
+    if (update) {
+      const blog = await Blog.find()
+        .sort({ _id: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('writer', '-password')
+      const totalblogs = await Blog.count()
+      const totalpages = Math.ceil(totalblogs / limit)
+      res
+        .status(200)
+        .json({ message: 'Blog set as featured', totalpages, blog })
+    } else {
+      res.status(400).json({ message: 'Error proceding this request' })
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ message: error })
+  }
+}
+export const DashboardItems = async (req: Request, res: Response) => {
+  try {
+    const admins = await User.count({ admin: true })
+    const users = await User.count()
+    const featured = await Blog.count({ featured: true })
+    const blogs = await Blog.count()
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    const count = await Blog.aggregate([
+      { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+      { $group: { _id: null, totalVisitors: { $sum: '$visitors' } } }
+    ]).exec()
+    const totalVisitors = count[0] ? count[0].totalVisitors : 0
+    const analytics = {
+      admins,
+      users,
+      featured,
+      blogs,
+      totalVisitors
+    }
+    return res.status(200).json(analytics)
   } catch (error) {
     return res.status(500).json({ message: error })
   }
