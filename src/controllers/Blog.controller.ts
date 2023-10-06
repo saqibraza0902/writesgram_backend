@@ -6,6 +6,7 @@ import { GetBlogValidor } from '../validators/Blog.validators'
 import { GetSingleBlogValidator } from '../validators/Blog.validators'
 import { countWords } from '../utils/WordCount'
 import User from '../modals/User.modal'
+import Subscribe from '../modals/Subscribe.modal'
 export const AddBlog = async (req: Request, res: Response): Promise<void> => {
   try {
     const { title, paragraph, frontImage, content, category } =
@@ -74,6 +75,7 @@ export const GetBlog = async (req: Request, res: Response) => {
 export const GetSingleBlog = async (req: Request, res: Response) => {
   try {
     const { id } = await GetSingleBlogValidator.validate(req.query)
+    console.log('first')
     const blog = await Blog.findById(id)
     await Blog.findByIdAndUpdate({ _id: id }, { visitors: blog.visitors + 1 })
 
@@ -137,6 +139,7 @@ export const DashboardItems = async (req: Request, res: Response) => {
     const users = await User.count()
     const featured = await Blog.count({ featured: true })
     const blogs = await Blog.count()
+    const subscribers = await Subscribe.count()
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
     const count = await Blog.aggregate([
@@ -149,9 +152,31 @@ export const DashboardItems = async (req: Request, res: Response) => {
       users,
       featured,
       blogs,
+      subscribers,
       totalVisitors
     }
     return res.status(200).json(analytics)
+  } catch (error) {
+    return res.status(500).json({ message: error })
+  }
+}
+export const SubscribeCtrl = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body
+    const find = await Subscribe.findOne({ email: email })
+    if (find) {
+      return res.status(400).json({ message: 'You have already subscribed' })
+    }
+    const subs = new Subscribe({
+      email: email
+    })
+    if (subs) {
+      subs.save()
+      return res
+        .status(200)
+        .json({ message: 'Successfully subscribed to Newslatter' })
+    }
+    return res.status(400).json({ message: 'Error subscribing to Newslatter' })
   } catch (error) {
     return res.status(500).json({ message: error })
   }

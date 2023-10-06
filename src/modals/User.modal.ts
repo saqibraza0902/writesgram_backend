@@ -6,6 +6,7 @@ export interface IUser {
   country: string
   city: string
   email: string
+  profile?: string
   password: string
   verified: boolean
   admin: boolean
@@ -18,6 +19,7 @@ const userModel = new mongoose.Schema<IUser>(
     country: { type: String, required: true },
     city: { type: String, required: true },
     email: { type: String, required: true },
+    profile: { type: String },
     password: { type: String, required: true },
     verified: { type: Boolean, default: false },
     admin: { type: Boolean, default: false }

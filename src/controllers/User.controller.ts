@@ -175,7 +175,7 @@ export const AdminLogin = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Incorrect credentials' })
     }
     const isVerifed = await Users.findOne({ email: email })
-    if (isVerifed.admin) {
+    if (isVerifed.admin && isVerifed.verified) {
       const token = createAccessToken({
         _id: String(dbUser._id)
       })
