@@ -1,7 +1,8 @@
-import nodemailer from 'nodemailer';
+import { Response } from "express";
+import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
+  host: "smtp.gmail.com",
   port: 465,
   secure: true,
   auth: {
@@ -14,10 +15,15 @@ interface IOTP {
   otp?: Number;
 }
 export const otpservice = async ({ email, otp }: IOTP) => {
-  const info = await transporter.sendMail({
-    from: process.env.USER,
-    to: email,
-    subject: 'OTP for Login',
-    text: `Your one time OTP for login is ${otp}`,
-  });
+  try {
+    const info = await transporter.sendMail({
+      from: process.env.USER,
+      to: email,
+      subject: "OTP for Login",
+      text: `Your one time OTP for login is ${otp}`,
+    });
+    console.log(info);
+  } catch (error) {
+    return console.log(error);
+  }
 };

@@ -1,15 +1,16 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
 export interface IUser {
-  name: string
-  phone: number
-  country: string
-  city: string
-  email: string
-  profile?: string
-  password: string
-  verified: boolean
-  admin: boolean
+  name: string;
+  phone: number;
+  country: string;
+  city: string;
+  email: string;
+  profile?: string;
+  password: string;
+  verified: boolean;
+  admin: boolean;
+  resetToken: string;
 }
 
 const userModel = new mongoose.Schema<IUser>(
@@ -22,12 +23,13 @@ const userModel = new mongoose.Schema<IUser>(
     profile: { type: String },
     password: { type: String, required: true },
     verified: { type: Boolean, default: false },
-    admin: { type: Boolean, default: false }
+    admin: { type: Boolean, default: false },
+    resetToken: { type: String },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
-)
+);
 
-const User = mongoose.model<IUser>('user', userModel)
-export default User
+const User = mongoose.model<IUser>("user", userModel);
+export default User;
