@@ -249,22 +249,25 @@ export const ChangePassword = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     console.log(email, password);
-    // const user = await Users.findOne({ email: email });
-    // const id = user._id;
-    // const token = user.resetToken;
-    // const deocde = DecodeToken(token);
-    // const resetTokenTimestamp = deocde.exp;
-    // const currentTimestamp = Date.now();
-    // const tokenExpirationTime = 10 * 60 * 1000;
-    // if (
-    //   currentTimestamp - resetTokenTimestamp > tokenExpirationTime &&
-    //   deocde._id === id
-    // ) {
-    //   const hashpassword = await createHashPassword(password);
-    //   await Users.findByIdAndUpdate({ _id: id }, { password: hashpassword });
-    //   return res.status(200).json({ message: "Password updated successfully" });
-    // }
-    // return res.status(400).json({ message: "Invalid or expired token" });
+    const user = await Users.findOne({ email: email });
+    const id = user._id.toString();
+    const token = user.resetToken;
+    const deocde = DecodeToken(token);
+    const TokenTimeStmp = deocde.exp;
+    const CTimeStmp = Date.now();
+
+    console.log(id, deocde._id);
+    const TokenExpTime = 10 * 60 * 1000;
+
+    if (CTimeStmp - TokenTimeStmp > TokenExpTime && id === deocde._id) {
+      const hashpassword = await createHashPassword(password);
+      await Users.findByIdAndUpdate(
+        { _id: id },
+        { password: hashpassword, resetToken: "" }
+      );
+      return res.status(200).json({ message: "Password updated successfully" });
+    }
+    return res.status(400).json({ message: "Invalid or expired token" });
   } catch (error) {
     res.status(500).json({ message: error });
   }

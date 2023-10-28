@@ -24,7 +24,7 @@ app.use(helmet());
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.get("/", (req, res) => {
-  res.send("HEllo");
+  res.send("Hello, your api is working perfectly");
 });
 app.use("/blog", BlogRoutes);
 app.use("/user", UserRoutes);
