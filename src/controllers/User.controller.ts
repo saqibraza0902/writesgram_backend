@@ -15,6 +15,7 @@ import Contact from "../modals/Contact.modal";
 import { contactservice } from "../services/contactservice";
 import { CreateResetToken } from "../utils/CreateResetToken";
 import { DecodeToken } from "../utils/DecodeToken";
+import { UploadImage } from "../lib/CloudinaryConfig";
 
 export const SignUp = async (req: Request, res: Response) => {
   try {
@@ -71,6 +72,7 @@ export const Login = async (req: Request, res: Response) => {
         email: user.email,
         name: user.name,
         phone: user.phone,
+        profile: user.profile,
         verified: user.verified,
       };
       return res.status(201).json({ token, user: returneduser });
@@ -132,14 +134,19 @@ export const ContactUs = async (req: Request, res: Response) => {
 };
 export const UpdateProfile = async (req: Request, res: Response) => {
   try {
-    const { name, email, country, city } = await ProfileValidator.validate(
-      req.body
-    );
+    const { name, email, country, city, profile, desc = "" } = req.body;
     const { id } = req.query;
-    console.log(id, name, email, country, city);
+    const profileupload = await UploadImage(profile);
     const UpdateUser = await Users.findByIdAndUpdate(
       { _id: id },
-      { name: name, email: email, country: country, city: city }
+      {
+        name: name,
+        email: email,
+        country: country,
+        city: city,
+        profile: profileupload.secure_url,
+        desc: desc,
+      }
     );
     if (UpdateUser) {
       return res.status(201).json({ message: "Profile Updated Successfully" });
@@ -198,6 +205,8 @@ export const AdminLogin = async (req: Request, res: Response) => {
         email: user.email,
         name: user.name,
         phone: user.phone,
+        profile: user.profile,
+        desc: user.desc,
         verified: user.verified,
       };
       return res.status(200).json({ token, user: returneduser });
