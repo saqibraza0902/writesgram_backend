@@ -136,6 +136,14 @@ export const UpdateProfile = async (req: Request, res: Response) => {
   try {
     const { name, email, country, city, profile, desc = "" } = req.body;
     const { id } = req.query;
+    const existingUser = await Users.findOne({ email });
+    if (existingUser && existingUser._id.toString() !== id) {
+      return res
+        .status(400)
+        .json({
+          message: "Email already in use. Please choose another email.",
+        });
+    }
     const profileupload = await UploadImage(profile);
     const UpdateUser = await Users.findByIdAndUpdate(
       { _id: id },
