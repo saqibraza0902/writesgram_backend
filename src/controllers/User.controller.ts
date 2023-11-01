@@ -138,11 +138,9 @@ export const UpdateProfile = async (req: Request, res: Response) => {
     const { id } = req.query;
     const existingUser = await Users.findOne({ email });
     if (existingUser && existingUser._id.toString() !== id) {
-      return res
-        .status(400)
-        .json({
-          message: "Email already in use. Please choose another email.",
-        });
+      return res.status(400).json({
+        message: "Email already in use. Please choose another email.",
+      });
     }
     const profileupload = await UploadImage(profile);
     const UpdateUser = await Users.findByIdAndUpdate(
@@ -227,9 +225,7 @@ export const AdminLogin = async (req: Request, res: Response) => {
 export const ResetPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
-    console.log(email);
     const emailExist = await Users.findOne({ email: email });
-    console.log(emailExist);
     if (emailExist) {
       const otpCode = Math.floor(1000 + Math.random() * 9000);
       let otpData = new OTP({ user: emailExist._id, code: otpCode });
