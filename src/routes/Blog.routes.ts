@@ -6,6 +6,8 @@ import { SetFeatured } from "../controllers/Blog.controller";
 import { GetPopularPost } from "../controllers/Blog.controller";
 import { DashboardItems, GetBlog } from "../controllers/Blog.controller";
 import { SubscribeCtrl } from "../controllers/Blog.controller";
+import { FilteredCategories } from "../controllers/Blog.controller";
+import { PostComment } from "../controllers/Blog.controller";
 const router = express.Router();
 
 router.post("/add-blog", AddBlog);
@@ -17,6 +19,9 @@ router.post("/subscribe", SubscribeCtrl);
 
 router.get("/stats", Details);
 router.get("/top-authers", TopAuther);
+
+router.get("/categories", FilteredCategories);
+router.post("/comment", PostComment);
 // Admin Routes
 router.patch("/add/featured", SetFeatured);
 router.get("/analytics", DashboardItems);

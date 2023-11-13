@@ -7,6 +7,7 @@ import { GetSingleBlogValidator } from "../validators/Blog.validators";
 import { countWords } from "../utils/WordCount";
 import User from "../modals/User.modal";
 import Subscribe from "../modals/Subscribe.modal";
+import Comments from "../modals/Comments.Modal";
 
 export const AddBlog = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -81,11 +82,14 @@ export const GetBlog = async (req: Request, res: Response) => {
 export const GetSingleBlog = async (req: Request, res: Response) => {
   try {
     const { id } = await GetSingleBlogValidator.validate(req.query);
-    console.log("first");
-    const blog = await Blog.findById(id);
-    await Blog.findByIdAndUpdate({ _id: id }, { visitors: blog.visitors + 1 });
 
-    return res.status(200).json(blog);
+    const blog = await Blog.findById(id);
+    const comments = await Comments.find({ blog: id }).populate(
+      "user",
+      "-password"
+    );
+    await Blog.findByIdAndUpdate({ _id: id }, { visitors: blog.visitors + 1 });
+    return res.status(200).json({ blog, comments });
   } catch (error) {
     return res.status(500).json({ message: error });
   }
@@ -222,6 +226,42 @@ export const TopAuther = async (req: Request, res: Response) => {
   try {
     const topauther = await User.find({ admin: true });
     return res.status(200).json(topauther);
+  } catch (error) {
+    return res.status(500).json({ message: error });
+  }
+};
+export const FilteredCategories = async (req: Request, res: Response) => {
+  try {
+    const { cat } = req.query;
+    if (!cat) {
+      return res.status(400).json({ message: "Error processing this request" });
+    }
+    const blogs = await Blog.find({ category: cat }).populate(
+      "writer",
+      "-password"
+    );
+    if (!blogs) {
+      return res.status(404).json({ message: "No blog found" });
+    }
+    return res.status(200).json(blogs);
+  } catch (error) {
+    return res.status(500).json({ message: error });
+  }
+};
+export const PostComment = async (req: Request, res: Response) => {
+  try {
+    const { comment } = req.body;
+    console.log(comment);
+    const { user, blog } = req.query;
+    const postComment = new Comments({
+      blog: blog,
+      user: user,
+      comment: comment,
+    });
+    if (postComment) {
+      await postComment.save();
+      return res.status(200).json({ message: "Comment Posted" });
+    }
   } catch (error) {
     return res.status(500).json({ message: error });
   }
