@@ -10,7 +10,7 @@ export interface IUser {
   password: string;
   verified: boolean;
   admin: boolean;
-  desc: string;
+  desc: string[];
   facebook: string;
   instagram: string;
   resetToken: string;
@@ -28,7 +28,7 @@ const userModel = new mongoose.Schema<IUser>(
     verified: { type: Boolean, default: false },
     admin: { type: Boolean, default: false },
     resetToken: { type: String },
-    desc: { type: String },
+    desc: [{ type: String }],
     facebook: { type: String },
     instagram: { type: String },
   },

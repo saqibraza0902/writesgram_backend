@@ -16,6 +16,7 @@ import { contactservice } from "../services/contactservice";
 import { CreateResetToken } from "../utils/CreateResetToken";
 import { DecodeToken } from "../utils/DecodeToken";
 import { UploadImage } from "../lib/CloudinaryConfig";
+import BlogPost from "../modals/Blog.modal";
 
 export const SignUp = async (req: Request, res: Response) => {
   try {
@@ -136,6 +137,12 @@ export const UpdateProfile = async (req: Request, res: Response) => {
   try {
     const { name, email, country, city, profile, desc = "" } = req.body;
     const { id } = req.query;
+
+    // Split the desc string by comma to create an array
+    const descArray = desc.split(",").map((item) => item.trim());
+
+    console.log(descArray); // Check the desc array in console for verification
+
     const existingUser = await Users.findOne({ email });
     if (existingUser && existingUser._id.toString() !== id) {
       return res.status(400).json({
@@ -151,7 +158,7 @@ export const UpdateProfile = async (req: Request, res: Response) => {
         country: country,
         city: city,
         profile: profileupload.secure_url,
-        desc: desc,
+        desc: descArray, // Store the updated desc as an array of separate elements
       }
     );
     if (UpdateUser) {
@@ -162,6 +169,7 @@ export const UpdateProfile = async (req: Request, res: Response) => {
     res.status(500).json({ message: error });
   }
 };
+
 export const UpdatePassword = async (req: Request, res: Response) => {
   try {
     const {
@@ -281,6 +289,21 @@ export const ChangePassword = async (req: Request, res: Response) => {
       return res.status(200).json({ message: "Password updated successfully" });
     }
     return res.status(400).json({ message: "Invalid or expired token" });
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+export const GetAuther = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.query;
+    const user = await Users.findById(id);
+    if (user.admin) {
+      const blogs = await BlogPost.find({ writer: id })
+        .populate("writer", "-password")
+        .limit(6);
+      return res.status(200).json({ user, blogs });
+    }
+    return res.status(400).json({ message: "Error processing this request" });
   } catch (error) {
     res.status(500).json({ message: error });
   }
