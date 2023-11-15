@@ -5,7 +5,7 @@ import { UpdatePassword, AdminLogin } from "../controllers/User.controller";
 import { ResetPassword } from "../controllers/User.controller";
 import { VerifyResetPasswordOTP } from "../controllers/User.controller";
 import { ChangePassword } from "../controllers/User.controller";
-import { GetAuther } from "../controllers/User.controller";
+import { GetAuther, AllAuthers } from "../controllers/User.controller";
 const router = express.Router();
 
 router.post("/register", SignUp);
@@ -18,6 +18,7 @@ router.post("/reset-password", ResetPassword);
 router.post("/verify-reset-otp", VerifyResetPasswordOTP);
 router.patch("/change-password", ChangePassword);
 router.get("/auther", GetAuther);
+router.get("/all-authers", AllAuthers);
 // Admin Routes
 router.post("/admin/login", AdminLogin);
 export default router;

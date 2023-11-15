@@ -17,6 +17,7 @@ import { CreateResetToken } from "../utils/CreateResetToken";
 import { DecodeToken } from "../utils/DecodeToken";
 import { UploadImage } from "../lib/CloudinaryConfig";
 import BlogPost from "../modals/Blog.modal";
+import User from "../modals/User.modal";
 
 export const SignUp = async (req: Request, res: Response) => {
   try {
@@ -169,7 +170,6 @@ export const UpdateProfile = async (req: Request, res: Response) => {
     res.status(500).json({ message: error });
   }
 };
-
 export const UpdatePassword = async (req: Request, res: Response) => {
   try {
     const {
@@ -306,5 +306,30 @@ export const GetAuther = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "Error processing this request" });
   } catch (error) {
     res.status(500).json({ message: error });
+  }
+};
+export const AllAuthers = async (req: Request, res: Response) => {
+  try {
+    const authers = await User.find({ admin: true });
+    const blogsByAuthors = await Promise.all(
+      authers.map(async (author) => {
+        const returneduser = {
+          _id: author._id,
+          city: author.city,
+          country: author.country,
+          email: author.email,
+          name: author.name,
+          phone: author.phone,
+          profile: author.profile,
+          desc: author.desc,
+          verified: author.verified,
+        };
+        const count = await BlogPost.count({ writer: author._id });
+        return { author: returneduser, count };
+      })
+    );
+    return res.status(200).json(blogsByAuthors);
+  } catch (error) {
+    return res.status(500).json({ message: error });
   }
 };
