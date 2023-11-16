@@ -5,6 +5,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import BlogRoutes from "./routes/Blog.routes";
 import UserRoutes from "./routes/Users.routes";
+import CategoryRoutes from "./routes/Category.routes";
 import bodyParser from "body-parser";
 
 require("dotenv").config();
@@ -28,4 +29,5 @@ app.get("/", (req, res) => {
 });
 app.use("/blog", BlogRoutes);
 app.use("/user", UserRoutes);
+app.use("/cat", CategoryRoutes);
 export default app;
